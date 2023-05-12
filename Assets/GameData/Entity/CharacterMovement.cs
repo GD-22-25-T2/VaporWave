@@ -10,8 +10,13 @@ public class CharacterMovement : MonoBehaviour
     [SerializeField] internal float JumpForce = 200;
     [SerializeField] internal LayerMask JumpableGrounds;
     Rigidbody rb;
-    public bool IsGrounded;
+    public bool CanJump;
     public bool CanDoublejump;
+    public bool CanWalljump;
+    public bool CanStickToWalls = true;
+
+    public float TimeStickedToWalls = 1;
+
     
 
 
@@ -43,33 +48,65 @@ public class CharacterMovement : MonoBehaviour
     void JumpAction(bool tryToJump)
     {
 
-        if (IsGrounded && tryToJump)
+        if (CanJump && CanWalljump is false && tryToJump) //Jump
         {
             rb.AddForce(0, JumpForce * Time.deltaTime, 0, ForceMode.Impulse);
 
         }
 
-        if (IsGrounded is false && CanDoublejump && Input.GetKey(KeyCode.S)/*provvisorio*/)
+        if (CanJump is false && CanDoublejump && Input.GetKey(KeyCode.S)/*provvisorio*/) //DoubleJump
         {
             rb.AddForce(0, JumpForce * 4 * Time.deltaTime, 0, ForceMode.Impulse);
             CanDoublejump = false;
         }
+
+        if (CanJump is false && CanWalljump && tryToJump) //WallJump
+        {
+            rb.constraints = RigidbodyConstraints.FreezeRotation;
+            rb.AddForce(0, JumpForce * 8 * Time.deltaTime, 0, ForceMode.Impulse);
+            CanWalljump = false;
+        }
+
     }
 
     private void OnCollisionEnter(Collision collision)
     {
-        if(collision.gameObject.layer == 6)
+        if(collision.gameObject.layer == 6) //Ground
         {
-            IsGrounded = true;
+            CanJump = true;
             CanDoublejump = true;
+        } 
+        if(collision.gameObject.layer == 7) //Wall
+        {
+            StartCoroutine(StickToWalls());
         }
+
     }
 
     private void OnCollisionExit(Collision collision)
     {
-        if (collision.gameObject.layer == 6)
+        if (collision.gameObject.layer == 6) //Ground
         {
-            IsGrounded = false;
+            CanJump = false;
         }
+        if (collision.gameObject.layer == 7) //Wall
+        {
+            rb.constraints = RigidbodyConstraints.FreezeRotation;
+            CanWalljump = false;
+            CanStickToWalls = true;
+        }
+    }
+
+    public IEnumerator StickToWalls()
+    {
+        if (CanStickToWalls)
+        {
+            CanWalljump = true;
+            rb.constraints = RigidbodyConstraints.FreezePositionY | RigidbodyConstraints.FreezeRotation;
+            yield return new WaitForSeconds(TimeStickedToWalls);
+            rb.constraints = RigidbodyConstraints.FreezeRotation;
+            CanStickToWalls = false;
+        }
+
     }
 }
