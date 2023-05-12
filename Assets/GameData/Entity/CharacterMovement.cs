@@ -9,17 +9,13 @@ public class CharacterMovement : MonoBehaviour
     [SerializeField] internal float MaxSpeed = 1000;
     [SerializeField] internal float JumpForce = 200;
     [SerializeField] internal LayerMask JumpableGrounds;
+    [SerializeField] internal bool CanJump;
+    [SerializeField] internal bool CanDoublejump;
+    [SerializeField] internal bool CanWalljump;
+    [SerializeField] internal bool CanStickToWalls = true;
     Rigidbody rb;
-    public bool CanJump;
-    public bool CanDoublejump;
-    public bool CanWalljump;
-    public bool CanStickToWalls = true;
 
-    public float TimeStickedToWalls = 1;
-
-    
-
-
+    [SerializeField] internal float TimeStickedToWalls = 1;
 
 
     void Start()
@@ -47,20 +43,20 @@ public class CharacterMovement : MonoBehaviour
 
     void JumpAction(bool tryToJump)
     {
-
+        
         if (CanJump && CanWalljump is false && tryToJump) //Jump
         {
             rb.AddForce(0, JumpForce * Time.deltaTime, 0, ForceMode.Impulse);
-
         }
 
-        if (CanJump is false && CanDoublejump && Input.GetKey(KeyCode.S)/*provvisorio*/) //DoubleJump
+        if (!CanJump && CanDoublejump && Input.GetKey(KeyCode.S)/*provvisorio*/) //DoubleJump
         {
             rb.AddForce(0, JumpForce * 4 * Time.deltaTime, 0, ForceMode.Impulse);
             CanDoublejump = false;
         }
+        
 
-        if (CanJump is false && CanWalljump && tryToJump) //WallJump
+        if (!CanJump && CanWalljump && tryToJump) //WallJump
         {
             rb.constraints = RigidbodyConstraints.FreezeRotation;
             rb.AddForce(0, JumpForce * 8 * Time.deltaTime, 0, ForceMode.Impulse);
@@ -69,7 +65,7 @@ public class CharacterMovement : MonoBehaviour
 
     }
 
-    private void OnCollisionEnter(Collision collision)
+    void OnCollisionEnter(Collision collision)
     {
         if(collision.gameObject.layer == 6) //Ground
         {
@@ -83,7 +79,7 @@ public class CharacterMovement : MonoBehaviour
 
     }
 
-    private void OnCollisionExit(Collision collision)
+    void OnCollisionExit(Collision collision)
     {
         if (collision.gameObject.layer == 6) //Ground
         {
@@ -97,7 +93,7 @@ public class CharacterMovement : MonoBehaviour
         }
     }
 
-    public IEnumerator StickToWalls()
+    IEnumerator StickToWalls()
     {
         if (CanStickToWalls)
         {
