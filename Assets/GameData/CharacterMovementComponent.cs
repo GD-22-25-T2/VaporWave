@@ -215,7 +215,7 @@ namespace GameData
         {
             IsFacingRight = !IsFacingRight;
             Vector3 localScale = Transform.localScale;
-            localScale.x += -1;
+            localScale.x *= -1;
             Transform.localScale = localScale;
         }
 
