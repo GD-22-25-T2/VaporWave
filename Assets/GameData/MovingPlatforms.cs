@@ -4,14 +4,13 @@ using UnityEngine;
 
 public class MovingPlatforms : MonoBehaviour
 {
-    [SerializeField] private GameObject[] MovementCoordinates;
+    [SerializeField] GameObject[] MovementCoordinates;
     int CurrentWaypoint = 0;
-    [SerializeField] private float Speed = 10f;
-
+    [SerializeField] float Speed = 10f;
+    [SerializeField] bool ChangePlayerParent;
 
     void Update()
     {
-
         if (Vector3.Distance(MovementCoordinates[CurrentWaypoint].transform.position, transform.position) < 0.01f)
         {
             CurrentWaypoint++;
@@ -22,13 +21,20 @@ public class MovingPlatforms : MonoBehaviour
         }
         transform.position = Vector3.MoveTowards(transform.position, MovementCoordinates[CurrentWaypoint].transform.position, Time.deltaTime * Speed);
     }
-    /*
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (collision.gameObject.CompareTag("Player"))
-        {
 
+    void OnCollisionEnter(Collision collision)
+    {
+        if (ChangePlayerParent && collision.gameObject.CompareTag("Player"))
+        {
+            collision.gameObject.transform.SetParent(transform);
         }
     }
-    */
+
+    void OnCollisionExit(Collision collision)
+    {
+        if (ChangePlayerParent && collision.gameObject.CompareTag("Player"))
+        {
+            collision.gameObject.transform.SetParent(null);
+        }
+    }
 }

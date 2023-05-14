@@ -1,5 +1,6 @@
 namespace GameData
 {
+    using UDK.API.Features;
     using UDK.API.Features.CharacterMovement;
     using UDK.API.Features.Enums;
     using UDK.API.Features.Input;
@@ -215,10 +216,10 @@ namespace GameData
         {
             IsFacingRight = !IsFacingRight;
             Vector3 localScale = Transform.localScale;
-            localScale.x += -1;
+            localScale.x *= -1;
             Transform.localScale = localScale;
         }
-
+        
         #endregion
 
         #region InputActions
